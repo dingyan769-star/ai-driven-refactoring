@@ -1,30 +1,44 @@
 # order_system.py
+from abc import ABC, abstractmethod
+
+class ShippingStrategy(ABC):
+    @abstractmethod
+    def calculate(self, weight):
+        pass
+
+
+class KRShipping(ShippingStrategy):
+    def calculate(self, weight):
+        return weight * 100
+
+
+class USShipping(ShippingStrategy):
+    def calculate(self, weight):
+        return weight * 300
+
+
+class DefaultShipping(ShippingStrategy):
+    def calculate(self, weight):
+        return weight * 500
 
 class Order:
-    def __init__(self, customer, country, weight, is_vip):
+    def __init__(self, customer, weight, shipping_strategy, is_vip):
         self.customer = customer
-        self.country = country
         self.weight = weight
+        self.shipping_strategy = shipping_strategy
         self.is_vip = is_vip
 
     def calculate_shipping_fee(self):
         # shipping by country
-        if self.country == "KR":
-            fee = self.weight * 100
-        elif self.country == "US":
-            fee = self.weight * 300
-        else:
-            fee = self.weight * 500
+        fee = self.shipping_strategy.calculate(self.weight)
 
-        # discount
         if self.is_vip:
-            fee = fee * 0.8
+            fee *= 0.8
 
         return fee
 
     def print_order(self):
         print("Customer:", self.customer)
-        print("Country:", self.country)
         print("Weight:", self.weight)
         print("VIP:", self.is_vip)
         print("Shipping Fee:", self.calculate_shipping_fee())
@@ -41,7 +55,8 @@ class PaymentProcessor:
 
 
 # usage
-order = Order("Alice", "KR", 10, True)
+strategy = KRShipping()
+order = Order("Alice", 10, strategy, True)
 order.print_order()
 
 payment = PaymentProcessor()
